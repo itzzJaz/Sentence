@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head><script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<meta charset="UTF-8">
+<title>KG2 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: "Poppins",serif;
+  background: linear-gradient(90deg, #fff5f8, #ffe4ec);
+  text-align:center;
+}
+
+.hidden{display:none;}
+
+.word{
+  display:inline-block;
+  background:white;
+  padding:10px;
+  margin:6px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+button{
+  padding:10px 20px;
+  margin:15px;
+  border-radius: 8px;
+  border: none;
+  background:#ff69b4;
+  color:white;
+  cursor:pointer;
+  font-weight: bold;
+  font-size: x-large ;
+  transition: all 0.2s ease;
+}
+
+button:hover{
+  background:#ff4da6;
+  transition: all 0.2s ease;
+}
+button:active{
+  transform: scale(0.9);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+input{
+  border:none;
+  border-bottom:2px solid #ff69b4;
+  outline:none;
+  font-size:18px;
+  text-align:center;
+}
+.text {
+  color: #d63384;
+  font-weight: bolder;
+
+}
+
+.word {
+  background: white;
+  border: 2px solid #ff69b4;
+  transition: all 0.2s ease;
+}
+
+.word:hover {
+  transform: scale(1.1);
+  background: #ffe4ec;
+}
+
+.word:active {
+  transform: scale(0.95);
+}
+.word.selected {
+  background: #ffb6c1;
+  transform: scale(1.1);
+}
+
+#question{
+  color:#6a1b9a;
+  font-size:24px;
+  margin:50px 0 20px 0;
+}
+
+#answerBox{
+  color:green;
+  font-size:22px;
+  margin:30px 0 50px 0;
+}
+
+#popup{
+  position:fixed;
+  top:30%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  padding:25px 40px;
+  border-radius:12px;
+  font-size:28px;
+  color:white;
+  display:none;
+  z-index:999;
+  animation: popAnim 0.3s ease;
+}
+
+@keyframes popAnim{
+  from{ transform:translate(-50%,-60%) scale(0.8); opacity:0; }
+  to{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+}
+
+
+a{cursor:pointer;color:blue;}
+
+.correct{color:green;font-weight:bold;}
+.wrong{color:red;font-weight:bold;}
+
+.delBtn{
+  background:red;
+  color:white;
+  border:none;
+  padding:5px 10px;
+  margin-left:10px;
+  cursor:pointer;
+  border-radius:5px;
+}
+.badge{
+  background: linear-gradient(45deg, gold, orange);
+  color: black;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 22px;
+  display: inline-block;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+</style>
+</head>
+
+<body>
+<br>
+<h1 class ="text">GEMS MILLENNIUM SCHOOL SHARJAH</h1>
+<div style="height:2px;"></div>
+
+<h2 class ="text" style="font-size: x-large">KG2 H</h2>
+<div style="height:100px;"></div>
+
+<div id="popup"></div>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <button onclick="showStudent()">Student</button>
+  <button onclick="showTeacher()">Teacher</button>
+</div>
+
+<!-- STUDENT -->
+<div id="studentPage" class="hidden">
+  <input id="studentName" placeholder="Enter Name"><br>
+  <button onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<!-- TEACHER -->
+<div id="teacherPage" class="hidden">
+  <label for="pin"></label><input id="pin" type="password" placeholder="Enter PIN"><br>
+  <button onclick="loginTeacher()">Login</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quizPage" class="hidden">
+
+  <div id="question"></div>
+  <h2 id = "prog"></h2>
+  <div id="words"></div>
+  <div id="answerBox"></div>
+
+  <button onclick="submitAnswer()">Submit</button>
+  <button onclick="resetAnswer()">Reset</button>
+  <br>
+  <br>
+  <button onclick="goToLogin()">Back to Login</button>
+</div>
+
+<!-- FINISH -->
+<div id="finishPage" class="hidden">
+  <h1 id ="score"></h1>
+  <h2 style="color:green;">🎉 FINISHED 🎉</h2>
+
+  <h3 id ="badge"></h3>
+  <button onclick="goToLogin()">Back to Login</button>
+</div>
+
+<!-- REPORT -->
+<div id="reportPage" class="hidden">
+  <h2 class = "text">Teacher Report</h2>
+  <br>
+  <h2 class="text">Student Data Available on the Google Sheet Given Below</h2>
+  <br>
+  <a href="https://docs.google.com/spreadsheets/d/11o0e2U56z9S_G7oJ-rG6IVu5QEd1Fj3_f63_O4SZRw8/edit?usp=sharing"
+  target="_blank"
+  style="display:inline-block;padding:10px 16px;background:green;color:white;border-radius:8px;text-decoration:none;font-weight:bold;margin:10px 0;">
+  📊 GOOGLE SHEET
+  </a>
+
+  <br>
+   <h2 class="text">Questions Are On Google Sheet Given Below</h2>
+  <br>
+  <a href="https://docs.google.com/spreadsheets/d/1PbZGhpo_IEH1bLLQ4Dgfm_GZe_jvpML7z7JAuS73kFU/edit?usp=sharing"
+  target="_blank"
+  style="display:inline-block;padding:10px 16px;background:green;color:white;border-radius:8px;text-decoration:none;font-weight:bold;margin:10px 0;">
+  ? QUESTIONS
+  </a>
+  <br>
+  <br>
+
+  <button onclick="goToLogin()">Back to Login</button>
+</div>
+
+<!-- DETAIL -->
+<div id="detailPage" class="hidden">
+  <button onclick="backToReports()">⬅ Back</button>
+  <h3 id="studentTitle"></h3>
+  <div id="detail"></div>
+</div>
+<audio id="correctS" src="correct.mp3"></audio>
+<audio id="wrongS" src="incorrect.mp3"></audio>
+<audio id="clapS" src="clap.mp3"></audio>
+<script>
+
+let questions = [];
+let questionsLoaded = false;
+
+let i=0;
+let answer=[];
+let wrongAttempts=0;
+let student="";
+let results=[];
+let reports = [];
+
+/* POPUP */
+function pop(msg,color){
+ let p=document.getElementById("popup");
+ p.innerText=msg;
+ p.style.background=color;
+ p.style.display="block";
+ setTimeout(()=>p.style.display="none",1200);
+}
+
+/* RESET VIEW */
+function hideAll(){
+ loginPage.classList.add("hidden");
+ studentPage.classList.add("hidden");
+ teacherPage.classList.add("hidden");
+ quizPage.classList.add("hidden");
+ finishPage.classList.add("hidden");
+ reportPage.classList.add("hidden");
+ detailPage.classList.add("hidden");
+}
+
+/* NAV */
+function showStudent(){
+ hideAll();
+ studentPage.classList.remove("hidden");
+}
+
+function showTeacher(){
+ hideAll();
+ teacherPage.classList.remove("hidden");
+}
+
+function goToLogin(){
+ hideAll();
+ loginPage.classList.remove("hidden");
+}
+
+/* TEACHER LOGIN */
+function loginTeacher(){
+ if(pin.value==="321"){
+  showReports();
+ } else {
+  pop("Wrong PIN Try Again","red");
+  pin.value="";
+ }
+}
+
+/* SHOW REPORTS (FIXED NAVIGATION) */
+function showReports(){
+ hideAll();
+ reportPage.classList.remove("hidden");
+}
+
+/* STUDENT START */
+function startQuiz(){
+
+  student = studentName.value || "Student";
+
+  if(studentName.value === ""){
+    pop("Enter Name","red");
+    return;
+  }
+
+  if(!questionsLoaded || questions.length === 0){
+    pop("Loading questions... try again in 2 sec","orange");
+    return;
+  }
+
+  i = 0;
+  results = [];
+  wrongAttempts = 0;
+  answer = [];
+
+  hideAll();
+  quizPage.classList.remove("hidden");
+  loadQ();
+}
+
+function shuffle(a){
+ return a.sort(()=>Math.random()-0.5);
+}
+
+function loadQ(){
+ if(i>=questions.length){
+   launchConfetti();
+   save();
+   hideAll();
+   finishPage.classList.remove("hidden");
+   return;
+ }
+
+ answer=[];
+ wrongAttempts=0;
+
+ let wordsArr = shuffle(questions[i].split(" "));
+ let prog = document.getElementById("prog")
+ question.innerText="Arrange the sentence:";
+ words.innerHTML="";
+ let score = results.filter(r => r.s === "Correct").length;
+ prog.innerText = `${score}/${questions.length}`
+ answerBox.innerText="";
+
+ wordsArr.forEach(w=>{
+  let s=document.createElement("span");
+  s.className="word";
+  s.innerText=w;
+  s.onclick=()=>{
+
+    s.style.background = "#ffb6c1";
+    s.classList.add("selected");
+
+    add(w);};
+  words.appendChild(s);
+ });
+}
+
+function add(w){
+ answer.push(w);
+ answerBox.innerText=answer.join(" ");
+}
+
+function resetAnswer(){
+ answer=[];
+ answerBox.innerText="";
+
+
+ let allWords = document.querySelectorAll(".word");
+ allWords.forEach(w=>{
+   w.style.background = "white";
+ });
+}
+
+function submitAnswer(){
+ let user=answer.join(" ");
+ let correct=questions[i];
+ let correctS= document.getElementById("correctS")
+  let wrongS = document.getElementById("wrongS")
+  correctS.volume = 0.4;
+  wrongS.volume = 0.4;
+ if(user===correct){
+   correctS.play();
+  results.push({q:correct,a:user,s:"Correct"});
+  pop("CORRECT","green");
+  i++;
+  setTimeout(loadQ,500);
+ } else {
+   wrongS.play()
+  wrongAttempts++;
+  results.push({q:correct,a:user,s:"Wrong"});
+  pop("WRONG","red");
+  resetAnswer();
+
+  if(wrongAttempts>=2){
+    pop("Correct Answer: " + correct, "blue");
+
+  i++;
+
+  setTimeout(loadQ,1500);
+  }
+ }
+}
+
+
+function save(){
+
+  let score = results.filter(r => r.s === "Correct").length;
+  let badge_text = document.getElementById("badge")
+  if (score === results.length){
+    badge_text.innerHTML='<span class = "badge">Congrats Full Points 🏆</span> '
+  }
+  let score_text = document.getElementById("score")
+  score_text.innerText=`${score}/${questions.length}`
+
+
+let payload = {
+  name: student,
+  score: score,
+  total: questions.length,
+  details: JSON.stringify(results)
+};
+
+
+  fetch("https://script.google.com/macros/s/AKfycbxg4imblGO5GIuR-xtdeeOKi6-6rFURZ9SSlOQXPABErutPzg4Hf-6kvm3jGADXNLRJ/exec", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  })
+  .then(response => console.log("Data sent "))
+  .catch(error => console.error("Error sending data:", error));
+
+
+  reports.push({name:student,data:results});
+
+}
+
+/* REPORT LIST */
+
+
+
+
+
+
+
+/* FIXED BACK BUTTON */
+function backToReports(){
+ showReports();
+}
+function launchConfetti(){
+  confetti({
+    particleCount: 200,
+    spread: 100,
+    origin: { y: 0.6 }
+  });
+  let clapS = document.getElementById("clapS")
+  clapS.volume = 0.1
+  clapS.play()
+}
+function loadQuestionsFromSheet(){
+  fetch("https://script.google.com/macros/s/AKfycbymwj29ccQOdn08o2CIOjdo5vE5zH1cCbJaTZlN8V9GIKXvsqzhVWQRBUO_X_ztH2Te/exec")
+  .then(res => res.json())
+  .then(data => {
+    questions = data;
+    questionsLoaded = true;
+    console.log("Questions loaded:", questions);
+  })
+  .catch(err => {
+    console.error("Failed to load questions", err);
+  });
+}
+window.onload = function(){
+  loadQuestionsFromSheet();
+
+  let check = setInterval(()=>{
+    if(questions.length > 0){
+      clearInterval(check);
+      console.log("Ready to start quiz");
+    }
+  },500);
+};
+
+</script>
+
+</body>
+</html>
