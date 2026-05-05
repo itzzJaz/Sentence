@@ -258,8 +258,10 @@ a{cursor:pointer;color:blue;}
 <div id="teacherPage" class="hidden">
   <label for="pin"></label><input id="pin" type="password" placeholder="Enter PIN"><br>
   <br>
-  <button onclick="loginTeacher()">Login</button>
+
+  <button onclick="checkPin()">Login</button>
   <br>
+  <h3 id ="verify"></h3>
   <br>
   <button onclick="goToLogin()">Back to Login</button>
 </div>
@@ -389,6 +391,7 @@ function loginTeacher(){
 function showReports(){
  hideAll();
  reportPage.classList.remove("hidden");
+ document.getElementById("verify").innerText=""
 }
 
 /* STUDENT START */
@@ -547,19 +550,6 @@ let payload = {
   reports.push({name:student,data:results});
 
 }
-
-/* REPORT LIST */
-
-
-
-
-
-
-
-/* FIXED BACK BUTTON */
-function backToReports(){
- showReports();
-}
 function launchConfetti(){
   confetti({
     particleCount: 200,
@@ -587,6 +577,7 @@ function loadQuestionsFromSheet(){
     console.error("Failed to load questions", err);
   });
 }
+
 function toggleSound(){
   muted = !muted
   let soundB = document.getElementById("soundBtn")
@@ -596,6 +587,30 @@ function toggleSound(){
   else{
     soundB.innerText="🔊";
   }
+}
+function checkPin(){
+  let pinV = document.getElementById("pin").value;
+  let vText = document.getElementById("verify")
+  vText.innerText="Authenticating 🔐"
+  fetch("https://script.google.com/macros/s/AKfycbyctd5xIOdD3eLW36Vzf5-qs2nyf0la_TdGHOXHI4WdZnA55OT5wnU_eDoivTDIJLcm/exec", {
+    method: "POST",
+    body: JSON.stringify({ pin: pinV })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.valid){
+      showReports();
+    } else {
+      pop("Wrong PIN Try Again","red");
+      document.getElementById("pin").value = "";
+      vText.innerText="Denied"
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    pop("Server Error","red");
+    vText.innerText="Server Issue"
+  });
 }
 window.onload = function(){
   loadQuestionsFromSheet();
