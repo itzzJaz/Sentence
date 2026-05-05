@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang ="en">
 <head><script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <meta charset="UTF-8">
 <title>KG2 Quiz</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+
 <style>
 body {
   font-family: "Poppins",serif;
@@ -75,8 +78,8 @@ input{
 }
 
 .word:hover {
-  transform: scale(1.1);
-  background: #ffe4ec;
+  transform: scale(1.12);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.15);
 }
 
 .word:active {
@@ -91,13 +94,10 @@ input{
   color:#6a1b9a;
   font-size:24px;
   margin:50px 0 20px 0;
+  font-weight: bold;
 }
 
-#answerBox{
-  color:green;
-  font-size:22px;
-  margin:30px 0 50px 0;
-}
+
 
 #popup{
   position:fixed;
@@ -129,35 +129,48 @@ input{
   to{ transform:translate(-50%,-50%) scale(1); opacity:1; }
 }
 
-#loginCard{
-  background:white;
-  width:300px;
-  margin:100px auto;
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+
+.schoolHeader {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  animation: popIn 0.4s ease;
+
+}
+
+.schoolName {
+  font-size: 40px;
+  font-weight: 700;
+  color: #d63384;
+  letter-spacing: 1px;
+}
+
+.schoolSub {
+  font-size: 20px;
+  color: #d63384;
+  margin-top: 4px;
+  letter-spacing: 2px;
+}
+
+.className {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 6px 14px;
+  background: #ff69b4;
+  color: white;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bolder;
 }
 a{cursor:pointer;color:blue;}
-#loginPage, #studentPage, #teacherPage{
-  animation: fadeIn 0.3s ease;
-}
+#loginPage, #studentPage, #teacherPage,#loginCard
 
 @keyframes fadeIn{
   from{opacity:0; transform:translateY(10px);}
   to{opacity:1; transform:translateY(0);}
 }
-.correct{color:green;font-weight:bold;}
-.wrong{color:red;font-weight:bold;}
 
-.delBtn{
-  background:red;
-  color:white;
-  border:none;
-  padding:5px 10px;
-  margin-left:10px;
-  cursor:pointer;
-  border-radius:5px;
-}
 .badge{
   background: linear-gradient(45deg, gold, orange);
   color: black;
@@ -178,17 +191,43 @@ a{cursor:pointer;color:blue;}
   font-size: 24px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
   z-index: 1000;
+
 }
+#studentPage, #teacherPage, #quizPage, #finishPage ,#loginCard ,#reportPage{
+  max-width: 500px;
+  margin: auto;
+  background: #fffdfd;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0  10px 30px rgba(0,0,0,0.1);
+  border: 5px solid rgba(255,105,180,0.2);
+}
+
+#answerBox{
+  min-height: 60px;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 15px;
+  border-radius: 15px;
+  background: #ffffff;
+  border: 4px dashed #ff69b4;
+  font-size: 25px;
+  color: #333;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
 </style>
 </head>
 
 <body>
 <br>
-<h1 class ="text">GEMS MILLENNIUM SCHOOL SHARJAH</h1>
-<div style="height:2px;"></div>
 
-<h2 class ="text" style="font-size: x-large">KG2 H</h2>
-<div style="height:50px;"></div>
+<div class="schoolHeader">
+  <div class="schoolName">GEMS MILLENNIUM SCHOOL</div>
+  <div class="schoolSub">SHARJAH</div>
+  <br>
+  <div class="className">KG2 H</div>
+</div>
 
 <div id="popup"></div>
 
@@ -207,14 +246,22 @@ a{cursor:pointer;color:blue;}
 
 <!-- STUDENT -->
 <div id="studentPage" class="hidden">
+  <h2 id="Qstatus">Loading Questions...</h2>
   <input id="studentName" placeholder="Enter Name"><br>
   <button onclick="startQuiz()">Start Quiz</button>
+  <br>
+  <br>
+  <button onclick="goToLogin()">Back to Login</button>
 </div>
 
 <!-- TEACHER -->
 <div id="teacherPage" class="hidden">
   <label for="pin"></label><input id="pin" type="password" placeholder="Enter PIN"><br>
+  <br>
   <button onclick="loginTeacher()">Login</button>
+  <br>
+  <br>
+  <button onclick="goToLogin()">Back to Login</button>
 </div>
 
 <!-- QUIZ -->
@@ -259,7 +306,7 @@ a{cursor:pointer;color:blue;}
   <a href="https://docs.google.com/spreadsheets/d/1PbZGhpo_IEH1bLLQ4Dgfm_GZe_jvpML7z7JAuS73kFU/edit?usp=sharing"
   target="_blank"
   style="display:inline-block;padding:10px 16px;background:green;color:white;border-radius:8px;text-decoration:none;font-weight:bold;margin:10px 0;">
-  ? QUESTIONS
+  📝 QUESTIONS
   </a>
   <br>
   <br>
@@ -355,7 +402,7 @@ function startQuiz(){
   }
 
   if(!questionsLoaded || questions.length === 0){
-    pop("Loading questions... try again in 2 sec","orange");
+    pop("Loading questions... try again in 5 sec","orange");
     return;
   }
 
@@ -379,6 +426,7 @@ function loadQ(){
    save();
    hideAll();
    finishPage.classList.remove("hidden");
+
    return;
  }
 
@@ -390,7 +438,7 @@ function loadQ(){
  question.innerText="Arrange the sentence:";
  words.innerHTML="";
  let score = results.filter(r => r.s === "Correct").length;
- prog.innerText = `${score}/${questions.length}`
+ prog.innerText = `Score : ${score}/${questions.length}`
  answerBox.innerText="";
 
  wordsArr.forEach(w=>{
@@ -398,7 +446,8 @@ function loadQ(){
   s.className="word";
   s.innerText=w;
   s.onclick=()=>{
-
+    if(s.classList.contains("used")) return;
+    s.classList.add("used")
     s.style.background = "#ffb6c1";
     s.classList.add("selected");
 
@@ -417,9 +466,12 @@ function resetAnswer(){
  answerBox.innerText="";
 
 
+
  let allWords = document.querySelectorAll(".word");
  allWords.forEach(w=>{
    w.style.background = "white";
+   w.classList.remove("used")
+   w.classList.remove("selected")
  });
 }
 
@@ -526,6 +578,8 @@ function loadQuestionsFromSheet(){
   .then(data => {
     questions = data;
     questionsLoaded = true;
+    let Qstatus = document.getElementById("Qstatus")
+    Qstatus.innerText="Questions Loaded"
     questions = questions.sort(()=>Math.random()-0.5);
     console.log("Questions loaded:", questions);
   })
@@ -549,7 +603,7 @@ window.onload = function(){
   let check = setInterval(()=>{
     if(questions.length > 0){
       clearInterval(check);
-      console.log("Ready to start quiz");
+      console.log("Ready to start ");
     }
   },500);
 };
