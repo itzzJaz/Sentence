@@ -38,6 +38,9 @@ button{
 button:hover{
   background:#ff4da6;
   transition: all 0.2s ease;
+  transform: scale(1.05);
+
+  box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 button:active{
   transform: scale(0.9);
@@ -57,8 +60,15 @@ input{
   font-weight: bolder;
 
 }
+@keyframes popIn{
 
+  from{transform: scale(0); opacity:0;}
+
+  to{transform: scale(1); opacity:1;}
+
+}
 .word {
+  animation: popIn 0.2s ease;
   background: white;
   border: 2px solid #ff69b4;
   transition: all 0.2s ease;
@@ -100,7 +110,18 @@ input{
   color:white;
   display:none;
   z-index:999;
-  animation: popAnim 0.3s ease;
+  animation: popAnim 0.3s ease, fadeOut 1.2s ease forwards;
+
+
+}
+@keyframes fadeOut{
+
+  0%{opacity:1;}
+
+  80%{opacity:1;}
+
+  100%{opacity:0;}
+
 }
 
 @keyframes popAnim{
@@ -108,9 +129,23 @@ input{
   to{ transform:translate(-50%,-50%) scale(1); opacity:1; }
 }
 
-
+#loginCard{
+  background:white;
+  width:300px;
+  margin:100px auto;
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
 a{cursor:pointer;color:blue;}
+#loginPage, #studentPage, #teacherPage{
+  animation: fadeIn 0.3s ease;
+}
 
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
 .correct{color:green;font-weight:bold;}
 .wrong{color:red;font-weight:bold;}
 
@@ -133,6 +168,17 @@ a{cursor:pointer;color:blue;}
   display: inline-block;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
+#soundBtn{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
 </style>
 </head>
 
@@ -142,14 +188,21 @@ a{cursor:pointer;color:blue;}
 <div style="height:2px;"></div>
 
 <h2 class ="text" style="font-size: x-large">KG2 H</h2>
-<div style="height:100px;"></div>
+<div style="height:50px;"></div>
 
 <div id="popup"></div>
 
 <!-- LOGIN -->
+<div id="loginCard">
 <div id="loginPage">
+  <h2>Choose Role:</h2>
+  <br>
+
   <button onclick="showStudent()">Student</button>
+  <br>
+  <br>
   <button onclick="showTeacher()">Teacher</button>
+</div>
 </div>
 
 <!-- STUDENT -->
@@ -223,10 +276,12 @@ a{cursor:pointer;color:blue;}
 <audio id="correctS" src="correct.mp3"></audio>
 <audio id="wrongS" src="incorrect.mp3"></audio>
 <audio id="clapS" src="clap.mp3"></audio>
+<button id="soundBtn" onclick="toggleSound()">🔊</button>
 <script>
 
 let questions = [];
 let questionsLoaded = false;
+let muted = false;
 
 let i=0;
 let answer=[];
@@ -253,6 +308,7 @@ function hideAll(){
  finishPage.classList.add("hidden");
  reportPage.classList.add("hidden");
  detailPage.classList.add("hidden");
+ loginCard.classList.add("hidden")
 }
 
 /* NAV */
@@ -269,6 +325,7 @@ function showTeacher(){
 function goToLogin(){
  hideAll();
  loginPage.classList.remove("hidden");
+ loginCard.classList.remove("hidden")
 }
 
 /* TEACHER LOGIN */
@@ -374,13 +431,17 @@ function submitAnswer(){
   correctS.volume = 0.4;
   wrongS.volume = 0.4;
  if(user===correct){
-   correctS.play();
+   if (!muted){
+     correctS.currentTime = 0;
+   correctS.play();}
   results.push({q:correct,a:user,s:"Correct"});
   pop("CORRECT","green");
   i++;
   setTimeout(loadQ,500);
  } else {
-   wrongS.play()
+   if (!muted){
+     wrongS.currentTime = 0;
+   wrongS.play()}
   wrongAttempts++;
   results.push({q:correct,a:user,s:"Wrong"});
   pop("WRONG","red");
@@ -391,7 +452,7 @@ function submitAnswer(){
 
   i++;
 
-  setTimeout(loadQ,1500);
+  setTimeout(loadQ,500);
   }
  }
 }
@@ -402,7 +463,14 @@ function save(){
   let score = results.filter(r => r.s === "Correct").length;
   let badge_text = document.getElementById("badge")
   if (score === results.length){
-    badge_text.innerHTML='<span class = "badge">Congrats Full Points 🏆</span> '
+    badge_text.innerHTML='<span class = "badge">Perfect! ⭐️⭐️⭐️</span> '
+
+  }
+  else if (score >= questions.length/2){
+    badge_text.innerHTML='<span class = "badge">Good! ⭐⭐️️️</span> '
+  }
+  else{
+    badge_text.innerHTML='<span class = "badge">Keep Practicing! ⭐️</span> '
   }
   let score_text = document.getElementById("score")
   score_text.innerText=`${score}/${questions.length}`
@@ -447,8 +515,10 @@ function launchConfetti(){
     origin: { y: 0.6 }
   });
   let clapS = document.getElementById("clapS")
-  clapS.volume = 0.1
-  clapS.play()
+  clapS.volume = 0.2
+  if (!muted){
+    clapS.currentTime = 0;
+  clapS.play();}
 }
 function loadQuestionsFromSheet(){
   fetch("https://script.google.com/macros/s/AKfycbymwj29ccQOdn08o2CIOjdo5vE5zH1cCbJaTZlN8V9GIKXvsqzhVWQRBUO_X_ztH2Te/exec")
@@ -456,11 +526,22 @@ function loadQuestionsFromSheet(){
   .then(data => {
     questions = data;
     questionsLoaded = true;
+    questions = questions.sort(()=>Math.random()-0.5);
     console.log("Questions loaded:", questions);
   })
   .catch(err => {
     console.error("Failed to load questions", err);
   });
+}
+function toggleSound(){
+  muted = !muted
+  let soundB = document.getElementById("soundBtn")
+  if (muted){
+    soundB.innerText="🔇";
+  }
+  else{
+    soundB.innerText="🔊";
+  }
 }
 window.onload = function(){
   loadQuestionsFromSheet();
